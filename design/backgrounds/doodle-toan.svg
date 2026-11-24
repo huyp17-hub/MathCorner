@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="360" viewBox="0 0 360 360" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2">
+  <!-- Hoạ tiết lặp: nét vẽ tay ký hiệu toán. Dùng làm background-image, lặp ngang dọc. -->
+  <g stroke-opacity="0.5">
+    <!-- π -->
+    <g transform="translate(28 30) rotate(-8)" stroke="#FF8F85"><path d="M2 6H30M11 6V28M22 6C22 17 23 25 29 28"/></g>
+    <!-- căn bậc hai -->
+    <g transform="translate(196 34) rotate(6)" stroke="#8FB89A"><path d="M2 18L8 15L14 30L21 2H46"/><path d="M27 10L38 24M38 10L27 24"/></g>
+    <!-- vòng tròn có bán kính -->
+    <g transform="translate(110 92)" stroke="#8FB89A"><circle cx="16" cy="16" r="15"/><path d="M16 16L28 7"/><circle cx="16" cy="16" r="1.5" fill="#8FB89A"/></g>
+    <!-- tam giác vuông -->
+    <g transform="translate(286 96) rotate(12)" stroke="#A79BC7"><path d="M2 34L34 34L2 2Z"/><path d="M2 26H10V34"/></g>
+    <!-- hệ trục + parabol -->
+    <g transform="translate(40 150)" stroke="#E0B65C"><path d="M2 34H48M24 2V44"/><path d="M8 8Q24 62 40 8"/></g>
+    <!-- vô cực -->
+    <g transform="translate(180 168) rotate(-6)" stroke="#FF8F85"><path d="M20 11C14 3 3 4 3 11C3 18 14 19 20 11C26 3 37 4 37 11C37 18 26 19 20 11Z"/></g>
+    <!-- x mũ 2 -->
+    <g transform="translate(292 236) rotate(8)" stroke="#8FB89A"><path d="M2 10L18 30M18 10L2 30"/><path d="M23 6C23 1 31 1 31 6C31 10 23 13 23 16H32"/></g>
+    <!-- tổng sigma -->
+    <g transform="translate(36 268) rotate(-10)" stroke="#A79BC7"><path d="M26 3H3L15 17L3 31H26"/></g>
+    <!-- góc có cung -->
+    <g transform="translate(150 280) rotate(4)" stroke="#FF8F85"><path d="M2 30H40M2 30L30 6"/><path d="M16 30A14 14 0 0 0 13 21"/></g>
+    <!-- phép tính nhỏ -->
+    <g transform="translate(258 318)" stroke="#E0B65C"><path d="M8 0V16M0 8H16"/></g>
+    <g transform="translate(96 226) rotate(10)" stroke="#A79BC7"><path d="M0 0L12 12M12 0L0 12"/></g>
+    <g transform="translate(330 172)" stroke="#E0B65C"><path d="M0 4H14M0 12H14"/></g>
+    <!-- lấp lánh -->
+    <g transform="translate(244 128)" stroke="#E0B65C"><path d="M7 0V14M0 7H14"/></g>
+  </g>
+</svg>

@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mockup · Trang chủ học sinh — Góc học ấm</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Patrick+Hand&display=swap&subset=vietnamese" rel="stylesheet">
+<style>
+  :root{
+    --bg:#fdfcf8; --card:#ffffff;
+    --fg:#292524; --muted:#6b625c;
+    --primary:#ff8f85; --primary-ink:#292524;
+    --primary-soft:#ffb7b2; --primary-softer:#ffe4e1;
+    --peach:#fff1ec; --sage:#e8efe8; --lavender:#efedf4;
+    --info:#2f6fa8; --border:#e7e5e4;
+    --ring:#e8655a;
+    --ok-bg:#e3f4ea; --ok-fg:#1f6f4a;
+    --late-bg:#fff3d6; --late-fg:#8a5a00;
+    --bad-bg:#fde7e4; --bad-fg:#b3261e;
+    --sub-bg:#e3f0fa; --sub-fg:#1e5a8c;
+    --none-bg:#f1f0ec; --none-fg:#57534e;
+    --shadow:0 4px 20px -2px rgba(0,0,0,.05);
+    --shadow-lift:0 10px 28px -6px rgba(0,0,0,.09);
+    --ease:cubic-bezier(.33,1,.68,1);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:"Be Vietnam Pro",system-ui,sans-serif;color:var(--fg);
+    background:var(--peach);-webkit-font-smoothing:antialiased;font-size:16px}
+  .hand{font-family:"Patrick Hand",cursive}
+
+  /* grain phủ nền (không phủ lên thẻ) */
+  .grain{position:fixed;inset:0;z-index:0;pointer-events:none;mix-blend-mode:overlay;opacity:.18}
+  /* blob mềm trang trí */
+  .blob{position:fixed;border-radius:50%;filter:blur(60px);opacity:.6;z-index:0;pointer-events:none}
+  .blob.a{width:280px;height:280px;background:#ffe4e1;top:-80px;right:-70px}
+  .blob.b{width:240px;height:240px;background:#e6e6fa;top:200px;left:-100px}
+  .blob.c{width:220px;height:220px;background:#e8efe8;bottom:120px;right:-80px}
+
+  .shell{max-width:520px;margin:0 auto;padding:0 18px 130px;position:relative;z-index:1}
+
+  /* top bar */
+  .bar{display:flex;align-items:center;justify-content:space-between;padding:20px 2px 6px}
+  .me{display:flex;align-items:center;gap:12px}
+  .avatar{width:46px;height:46px;border-radius:50%;background:var(--primary-soft);color:var(--primary-ink);
+    display:grid;place-items:center;font-weight:800;font-size:18px;box-shadow:var(--shadow)}
+  .me b{font-size:15px;font-weight:700;display:block;line-height:1.1}
+  .me small{color:var(--muted);font-weight:500;font-size:13px}
+  .streak{display:inline-flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--border);
+    color:var(--late-fg);font-weight:700;padding:8px 13px;border-radius:999px;box-shadow:var(--shadow);font-size:14px}
+  .flame{display:inline-block}
+
+  /* greeting */
+  .greet{padding:14px 2px 2px}
+  .greet .sub{color:var(--muted);font-weight:500;font-size:14px;margin:0}
+  .greet h1{margin:2px 0 0;font-size:40px;line-height:1.05;color:var(--fg)}
+  .greet h1 .sun{font-size:30px}
+  .greet p{margin:10px 0 0;color:var(--muted);font-weight:500;font-size:15px}
+  .greet p b{color:var(--fg);font-weight:700}
+
+  /* section */
+  section{margin-top:30px;position:relative}
+  .head{display:flex;align-items:baseline;justify-content:space-between;margin:0 2px 14px}
+  .head h2{font-size:18px;margin:0;font-weight:700;letter-spacing:-.2px}
+  .head .link{font-size:13.5px;color:var(--info);font-weight:600;text-decoration:none}
+
+  /* reveal */
+  .rv{opacity:0;transform:translateY(22px);transition:opacity .65s var(--ease),transform .65s var(--ease)}
+  .rv.in{opacity:1;transform:none}
+
+  /* weekly strip */
+  .week{background:var(--card);border:1px solid var(--border);border-radius:2rem;box-shadow:var(--shadow);display:flex;overflow:hidden}
+  .week .c{flex:1;padding:18px 10px;text-align:center;position:relative}
+  .week .c+.c:before{content:"";position:absolute;left:0;top:20%;bottom:20%;width:1px;background:var(--border)}
+  .week .v{font-size:24px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+  .week .k{font-size:12.5px;color:var(--muted);font-weight:500;margin-top:6px}
+  .week .v.coral{color:#e8655a}
+
+  /* task card */
+  .task{background:var(--card);border:1px solid var(--border);border-radius:2rem;padding:18px;box-shadow:var(--shadow);
+    display:flex;align-items:center;gap:14px;margin-bottom:14px;transition:transform .2s var(--ease),box-shadow .2s var(--ease)}
+  .task:hover{transform:translateY(-3px);box-shadow:var(--shadow-lift)}
+  .subj{width:50px;height:50px;border-radius:1rem;display:grid;place-items:center;font-weight:800;font-size:17px;flex-shrink:0;
+    color:var(--fg)}
+  .s-math{background:#eaf2fb;color:#1e5a8c}.s-chem{background:#e8efe8;color:#1f6f4a}.s-lit{background:var(--lavender);color:#5b4b8a}
+  .task .b{flex:1;min-width:0}
+  .task h3{margin:0;font-size:15.5px;font-weight:700;line-height:1.3}
+  .task .meta{display:flex;align-items:center;gap:8px;margin-top:7px;flex-wrap:wrap}
+  .task .meta .m{font-size:12.5px;color:var(--muted);font-weight:500}
+  .badge{font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px}
+  .b-late{background:var(--late-bg);color:var(--late-fg)}
+  .b-sub{background:var(--sub-bg);color:var(--sub-fg)}
+  .b-bad{background:var(--bad-bg);color:var(--bad-fg)}
+  .b-none{background:var(--none-bg);color:var(--none-fg)}
+  .btn{border:none;cursor:pointer;font-family:inherit;font-weight:700;font-size:14px;color:var(--primary-ink);background:var(--primary);
+    padding:11px 18px;border-radius:999px;box-shadow:var(--shadow);transition:transform .12s var(--ease);flex-shrink:0}
+  .btn:hover{transform:scale(1.04)}
+  .btn:active{transform:scale(.97)}
+  .btn:focus-visible{outline:2px solid var(--ring);outline-offset:2px}
+  .btn.soft{background:var(--primary-softer)}
+
+  /* progress */
+  .prog-wrap{background:var(--card);border:1px solid var(--border);border-radius:2rem;padding:18px 20px;box-shadow:var(--shadow)}
+  .prog-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px}
+  .prog-top b{font-size:15px;font-weight:700}
+  .prog-top small{color:var(--muted);font-weight:600;font-variant-numeric:tabular-nums}
+  .track{height:12px;background:#f1efe9;border-radius:999px;overflow:hidden}
+  .track i{display:block;height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,var(--primary-soft),var(--primary));
+    transform-origin:left;transition:width 1.1s var(--ease)}
+
+  /* sticky note */
+  .note{background:#fffdf3;border:1px solid #f1e8c8;border-radius:16px;padding:18px 18px 16px;box-shadow:var(--shadow-lift);
+    transform:rotate(-1.4deg);transition:transform .2s var(--ease)}
+  .note:hover{transform:rotate(0) translateY(-3px)}
+  .note .t{font-weight:700;font-size:14.5px;margin-bottom:4px}
+  .note p{margin:0;color:#5c554a;font-size:14px;line-height:1.5}
+  .note .sign{display:block;text-align:right;margin-top:8px;font-size:22px;color:#8a5a00}
+
+  /* badges */
+  .rail{display:flex;gap:12px;overflow-x:auto;padding:2px 2px 8px;scrollbar-width:none}
+  .rail::-webkit-scrollbar{display:none}
+  .bd{flex-shrink:0;width:118px;background:var(--card);border:1px solid var(--border);border-radius:1.25rem;
+    padding:16px 10px;text-align:center;box-shadow:var(--shadow)}
+  .medal{width:54px;height:54px;border-radius:50%;margin:0 auto 9px;display:grid;place-items:center;font-size:25px;
+    background:var(--primary-softer)}
+  .bd.lock .medal{background:#f1f0ec;filter:grayscale(1);opacity:.6}
+  .bd b{font-size:13px;font-weight:700}.bd small{display:block;color:var(--muted);font-size:11.5px;margin-top:2px}
+
+  /* floating pill nav */
+  .nav{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;width:min(500px,calc(100% - 32px));z-index:5;
+    background:rgba(255,255,255,.72);backdrop-filter:blur(20px);border:1px solid var(--border);border-radius:999px;
+    display:flex;justify-content:space-around;padding:8px;box-shadow:var(--shadow-lift)}
+  .nav a{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--muted);text-decoration:none;
+    font-size:11px;font-weight:600;padding:7px 0;border-radius:999px;position:relative;z-index:1;transition:color .2s}
+  .nav a svg{width:21px;height:21px}
+  .nav a.on{color:var(--primary-ink)}
+  .nav .pillbg{position:absolute;top:8px;bottom:8px;width:72px;border-radius:999px;background:var(--primary-softer);z-index:0;
+    transition:left .3s var(--ease)}
+
+  .tag{display:inline-block;padding:8px 14px;font-size:12px;color:#8a5a12;background:#fff7e9;border:1px dashed #f3c879;border-radius:12px;margin-top:16px}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none!important;transition:none!important}
+    .rv{opacity:1;transform:none}.track i{transition:none}
+  }
+</style>
+</head>
+<body>
+  <!-- grain giấy -->
+  <svg class="grain"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="2" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(#n)"/></svg>
+  <div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+
+  <div class="shell">
+    <!-- top bar -->
+    <div class="bar">
+      <div class="me">
+        <div class="avatar">M</div>
+        <div><b>Minh Nguyễn</b><small>Lớp 10A</small></div>
+      </div>
+      <span class="streak"><span class="flame">🔥</span> <span id="streak">7</span> ngày</span>
+    </div>
+
+    <!-- greeting -->
+    <div class="greet">
+      <p class="sub">Thứ Hai, 24/11</p>
+      <h1><span class="hand">Chào buổi sáng, Minh!</span> <span class="sun">☀️</span></h1>
+      <p>Hôm nay bạn có <b>2 bài</b> cần làm. Cố lên nhé!</p>
+    </div>
+
+    <!-- tuần này -->
+    <section>
+      <div class="week rv">
+        <div class="c"><div class="v" data-count="8.6">0</div><div class="k">Điểm trung bình</div></div>
+        <div class="c"><div class="v" data-count="96" data-suffix="%">0</div><div class="k">Chuyên cần</div></div>
+        <div class="c"><div class="v coral" data-count="6">0</div><div class="k">Buổi còn lại</div></div>
+      </div>
+    </section>
+
+    <!-- bài cần làm -->
+    <section>
+      <div class="head"><h2>Bài cần làm</h2><a class="link">Tất cả</a></div>
+
+      <div class="task rv">
+        <div class="subj s-math">Toán</div>
+        <div class="b"><h3>Kiểm tra Hàm số bậc hai</h3>
+          <div class="meta"><span class="m">15 câu</span><span class="badge b-late">⏰ Còn 3 giờ</span></div></div>
+        <button class="btn">Làm bài</button>
+      </div>
+
+      <div class="task rv">
+        <div class="subj s-chem">Hoá</div>
+        <div class="b"><h3>Phản ứng oxi hoá</h3>
+          <div class="meta"><span class="m">Tự luận</span><span class="badge b-sub">Hạn 25/11</span></div></div>
+        <button class="btn soft">Làm bài</button>
+      </div>
+
+      <div class="task rv">
+        <div class="subj s-lit">Văn</div>
+        <div class="b"><h3>Đọc hiểu văn bản</h3>
+          <div class="meta"><span class="m">10 câu</span><span class="badge b-bad">Quá hạn</span></div></div>
+        <button class="btn soft">Nộp muộn</button>
+      </div>
+    </section>
+
+    <!-- tiến độ tuần -->
+    <section>
+      <div class="prog-wrap rv">
+        <div class="prog-top"><b>Bài tập tuần này</b><small><span id="pnum">0</span>/5 bài</small></div>
+        <div class="track"><i id="pbar"></i></div>
+      </div>
+    </section>
+
+    <!-- ghi chú của cô -->
+    <section>
+      <div class="head"><h2>Ghi chú của cô</h2></div>
+      <div class="note rv">
+        <div class="t">Nhắc nhẹ cả lớp 📌</div>
+        <p>Nhớ ôn phần Hàm số trước buổi tới nhé. Bạn nào chưa nộp bài Hoá thì tranh thủ hôm nay.</p>
+        <span class="sign hand">— Cô Lan</span>
+      </div>
+    </section>
+
+    <!-- huy hiệu -->
+    <section>
+      <div class="head"><h2>Huy hiệu</h2><a class="link">Bộ sưu tập</a></div>
+      <div class="rail rv">
+        <div class="bd"><div class="medal">🔥</div><b>Chăm chỉ</b><small>Chuỗi 7 ngày</small></div>
+        <div class="bd"><div class="medal">🎯</div><b>Đúng giờ</b><small>10 buổi đúng giờ</small></div>
+        <div class="bd"><div class="medal">✍️</div><b>Đủ bài tuần</b><small>Nộp đủ 1 tuần</small></div>
+        <div class="bd lock"><div class="medal">🏅</div><b>Điểm 10</b><small>Chưa mở</small></div>
+      </div>
+    </section>
+
+    <div class="tag">🔖 Mockup tĩnh để duyệt phong cách — chưa phải app thật.</div>
+  </div>
+
+  <!-- pill nav -->
+  <nav class="nav">
+    <span class="pillbg" id="pill"></span>
+    <a class="on" data-i="0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 3l9 6.5"/><path d="M5 10v10h14V10"/></svg>Trang chủ</a>
+    <a data-i="1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h12a2 2 0 0 1 2 2v12H6a2 2 0 0 1-2-2z"/><path d="M8 5v12"/></svg>Bài tập</a>
+    <a data-i="2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Điểm danh</a>
+    <a data-i="3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M8 13l-1 8 5-3 5 3-1-8"/></svg>Thành tích</a>
+    <a data-i="4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 16 0v1"/></svg>Hồ sơ</a>
+  </nav>
+
+  <script>
+    const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // reveal + đếm số + thanh tiến độ khi hiện
+    const io=new IntersectionObserver((es)=>es.forEach(e=>{if(!e.isIntersecting)return;
+      const el=e.target;el.classList.add('in');io.unobserve(el);
+      el.querySelectorAll('[data-count]').forEach(n=>countUp(n));
+      if(el.querySelector('#pbar')){const bar=el.querySelector('#pbar');requestAnimationFrame(()=>bar.style.width='60%');countUp(document.getElementById('pnum'),null,3);}
+    }),{threshold:.3,rootMargin:'0px 0px -5% 0px'});
+    document.querySelectorAll('.rv').forEach(el=>io.observe(el));
+
+    function countUp(el,_,fixed){
+      const to=fixed!=null?fixed:parseFloat(el.dataset.count);
+      const suf=el.dataset.suffix||'';const dec=(to%1!==0)?1:0;
+      if(reduce){el.textContent=to.toFixed(dec)+suf;return;}
+      const t0=performance.now(),ms=1100;
+      (function s(t){const p=Math.min(1,(t-t0)/ms);const v=to*(1-Math.pow(1-p,3));
+        el.textContent=v.toFixed(dec)+suf;if(p<1)requestAnimationFrame(s);else el.textContent=to.toFixed(dec)+suf;})(t0);
+    }
+
+    // streak count
+    window.addEventListener('load',()=>{if(!reduce)countUp(Object.assign(document.getElementById('streak'),{dataset:{count:7}}),null,7);});
+
+    // pill nav vị trí
+    const pill=document.getElementById('pill');const links=[...document.querySelectorAll('.nav a')];
+    function movePill(a){const r=a.getBoundingClientRect(),nr=a.parentElement.getBoundingClientRect();
+      pill.style.width=r.width+'px';pill.style.left=(r.left-nr.left)+'px';}
+    movePill(links[0]);
+    links.forEach(a=>a.addEventListener('click',ev=>{ev.preventDefault();links.forEach(x=>x.classList.remove('on'));a.classList.add('on');movePill(a);}));
+    window.addEventListener('resize',()=>movePill(document.querySelector('.nav a.on')));
+  </script>
+</body>
+</html>

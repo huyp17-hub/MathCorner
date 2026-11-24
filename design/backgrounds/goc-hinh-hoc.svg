@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="640" viewBox="0 0 640 640" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Mảng hình học lớn đặt ở GÓC trang (không lặp). Đặt 1 bản ở góc trên-phải, 1 bản lật ở góc dưới-trái. -->
+  <circle cx="470" cy="170" r="150" fill="#FFE4E1"/>
+  <circle cx="470" cy="170" r="150" stroke="#FF8F85" stroke-opacity="0.45" stroke-width="2" stroke-dasharray="2 10"/>
+  <path d="M470 170L575 63" stroke="#FF8F85" stroke-opacity="0.6" stroke-width="2.5"/>
+  <circle cx="470" cy="170" r="5" fill="#FF8F85" fill-opacity="0.7"/>
+  <path d="M300 420L520 420L300 240Z" fill="#EFEDF4"/>
+  <path d="M300 396H324V420" stroke="#A79BC7" stroke-opacity="0.8" stroke-width="2.5"/>
+  <path d="M180 330H620M400 110V560" stroke="#8FB89A" stroke-opacity="0.5" stroke-width="2"/>
+  <path d="M250 150Q400 560 550 150" stroke="#8FB89A" stroke-opacity="0.8" stroke-width="3"/>
+  <path d="M560 470C560 440 600 440 600 470C600 500 560 500 560 470Z" stroke="#E0B65C" stroke-opacity="0.7" stroke-width="2.5"/>
+  <path d="M230 520V544M218 532H242" stroke="#E0B65C" stroke-opacity="0.8" stroke-width="2.5"/>
+</svg>
