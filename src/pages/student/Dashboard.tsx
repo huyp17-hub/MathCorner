@@ -124,7 +124,7 @@ export default function StudentDashboard() {
         <p className="font-hand text-2xl text-primary-foreground">
           {greeting()}, {profile?.full_name}!
         </p>
-        <h1 className="text-2xl font-bold tracking-tight md:text-3xl">Góc học của bạn</h1>
+        <h1 className="text-2xl font-bold tracking-tight md:text-3xl">Little Math Corner</h1>
         <div className="mt-5 space-y-3">
           {[1, 2, 3].map((i) => (
             <div key={i} className="h-20 animate-pulse rounded-[2rem] bg-border/50" />
@@ -140,7 +140,7 @@ export default function StudentDashboard() {
         <p className="font-hand text-2xl text-primary-foreground">
           {greeting()}, {profile?.full_name}! ☀️
         </p>
-        <h1 className="text-2xl font-bold tracking-tight md:text-3xl">Góc học của bạn</h1>
+        <h1 className="text-2xl font-bold tracking-tight md:text-3xl">Little Math Corner</h1>
       </div>
 
       {/* Dải 7 ngày + streak */}

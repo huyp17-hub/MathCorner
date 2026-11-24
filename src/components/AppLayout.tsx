@@ -29,7 +29,7 @@ export function AppLayout({ role, items }: { role: Role; items: NavItem[] }) {
       {/* Thanh trên — máy tính */}
       <header className="sticky top-0 z-30 hidden border-b border-border bg-card/70 backdrop-blur-xl md:block">
         <div className="mx-auto flex max-w-5xl items-center gap-6 px-6 py-3">
-          <NavLink to={`/${role}`} className="flex items-center" aria-label="Góc học — trang chủ">
+          <NavLink to={`/${role}`} className="flex items-center" aria-label="Little Math Corner — trang chủ">
             <Logo />
           </NavLink>
           <nav className="flex flex-1 items-center gap-1" aria-label="Điều hướng chính">

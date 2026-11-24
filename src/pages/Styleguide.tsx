@@ -72,7 +72,7 @@ export default function Styleguide() {
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Hệ thiết kế</p>
-            <h1 className="text-3xl font-bold tracking-tight">Góc học ấm</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Little Math Corner</h1>
           </div>
         </header>
         <p className="mt-3 text-muted-foreground">

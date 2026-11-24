@@ -6,7 +6,7 @@
 @source not "../design";
 
 /* ========================================================================
-   Hệ thiết kế "Góc học ấm" — token màu, chữ, bo góc, bóng
+   Hệ thiết kế "Little Math Corner" — token màu, chữ, bo góc, bóng
    Khai báo một chỗ; component không hard-code màu.
    ======================================================================== */
 @theme {

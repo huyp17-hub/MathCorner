@@ -34,7 +34,7 @@ export function Logo({
         <circle cx="15" cy="33" r="4" fill="#FFFFFF" />
       </svg>
       {withText && (
-        <span className="text-lg font-extrabold tracking-tight text-foreground">Góc học</span>
+        <span className="text-lg font-extrabold tracking-tight text-foreground">Little Math Corner</span>
       )}
     </span>
   )

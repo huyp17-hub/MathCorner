@@ -1,7 +1,7 @@
 import { forwardRef, type HTMLAttributes } from 'react'
 import { cn } from '@/lib/cn'
 
-/** Thẻ lớn "Góc học ấm": nền trắng, bo 2rem, viền mảnh, bóng mềm. */
+/** Thẻ lớn "Little Math Corner": nền trắng, bo 2rem, viền mảnh, bóng mềm. */
 export const Card = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
     <div

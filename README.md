@@ -1,4 +1,4 @@
-# Góc học ấm — Web Bài tập & Điểm danh
+# Little Math Corner
 
 Web app quản lý lớp học dành cho giáo viên, học sinh và phụ huynh.
 
