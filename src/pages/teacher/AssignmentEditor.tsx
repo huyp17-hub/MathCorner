@@ -5,6 +5,7 @@ import {
   Download,
   Eye,
   FileDown,
+  ImagePlus,
   ListChecks,
   Plus,
   Save,
@@ -34,6 +35,8 @@ import {
   parseQuestionsFromExcel,
   type ImportResult,
 } from '@/lib/question-excel'
+import { useAuth } from '@/hooks/useAuth'
+import { supabase } from '@/lib/supabase'
 import type { Assignment, QuestionKind } from '@/lib/types'
 
 const kindLabel: Record<Exclude<QuestionKind, 'drag_drop'>, string> = {
@@ -43,6 +46,18 @@ const kindLabel: Record<Exclude<QuestionKind, 'drag_drop'>, string> = {
 }
 
 const STATEMENT_LETTERS = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+const ACCEPTED_IMAGE_TYPES = 'image/png,image/jpeg,image/gif,image/webp'
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024
+
+async function uploadQuestionImage(file: File, teacherId: string): Promise<string> {
+  if (file.size > MAX_IMAGE_SIZE) throw new Error('Ảnh quá lớn (tối đa 5 MB).')
+  const ext = file.name.split('.').pop()?.toLowerCase() ?? 'png'
+  const path = `${teacherId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
+  const { error } = await supabase.storage.from('question-media').upload(path, file)
+  if (error) throw new Error('Không tải được ảnh: ' + error.message)
+  const { data } = supabase.storage.from('question-media').getPublicUrl(path)
+  return data.publicUrl
+}
 
 let seq = 0
 function defaultPoints(kind: QuestionKind): number {
@@ -91,6 +106,7 @@ function validate(q: EditorQuestion): string | null {
 export default function AssignmentEditor() {
   const { assignmentId } = useParams<{ assignmentId: string }>()
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [assignment, setAssignment] = useState<Assignment | null>(null)
   const [questions, setQuestions] = useState<EditorQuestion[] | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -308,6 +324,7 @@ export default function AssignmentEditor() {
               onChange={(patch) => update(i, patch)}
               onRemove={() => remove(i)}
               onMove={(dir) => move(i, dir)}
+              teacherId={user?.id ?? ''}
             />
           ))}
         </div>
@@ -374,6 +391,7 @@ function QuestionEditorCard({
   onChange,
   onRemove,
   onMove,
+  teacherId,
 }: {
   index: number
   total: number
@@ -382,6 +400,7 @@ function QuestionEditorCard({
   onChange: (patch: Partial<EditorQuestion>) => void
   onRemove: () => void
   onMove: (dir: -1 | 1) => void
+  teacherId: string
 }) {
   function setChoice(idx: number, patch: Partial<EditorQuestion['choices'][number]>) {
     const choices = q.choices.map((c, i) => (i === idx ? { ...c, ...patch } : c))
@@ -447,6 +466,13 @@ function QuestionEditorCard({
               <MarkdownContent>{q.content}</MarkdownContent>
             </div>
           )}
+          <ImageUploadButton
+            teacherId={teacherId}
+            onUploaded={(url) => {
+              const md = `\n![](${url})\n`
+              onChange({ content: q.content + md })
+            }}
+          />
         </div>
 
         {q.kind === 'multiple_choice' && (
@@ -666,6 +692,58 @@ function ShortAnswerEditor({
         <Plus className="size-4" strokeWidth={1.75} aria-hidden="true" />
         Thêm đáp án chấp nhận
       </Button>
+    </div>
+  )
+}
+
+function ImageUploadButton({
+  teacherId,
+  onUploaded,
+}: {
+  teacherId: string
+  onUploaded: (url: string) => void
+}) {
+  const ref = useRef<HTMLInputElement>(null)
+  const [uploading, setUploading] = useState(false)
+  const [err, setErr] = useState<string | null>(null)
+
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (ref.current) ref.current.value = ''
+    if (!file || !teacherId) return
+    setUploading(true)
+    setErr(null)
+    try {
+      const url = await uploadQuestionImage(file, teacherId)
+      onUploaded(url)
+    } catch (ex) {
+      setErr(ex instanceof Error ? ex.message : 'Lỗi tải ảnh.')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  return (
+    <div className="mt-1.5 flex items-center gap-2">
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        onClick={() => ref.current?.click()}
+        loading={uploading}
+      >
+        <ImagePlus className="size-4" strokeWidth={1.75} aria-hidden="true" />
+        Thêm hình minh hoạ
+      </Button>
+      <input
+        ref={ref}
+        type="file"
+        accept={ACCEPTED_IMAGE_TYPES}
+        onChange={handleFile}
+        className="hidden"
+        aria-label="Chọn ảnh minh hoạ"
+      />
+      {err && <span className="text-xs text-danger-foreground">{err}</span>}
     </div>
   )
 }
