@@ -360,6 +360,97 @@ export type Database = {
           },
         ]
       }
+      lesson_files: {
+        Row: {
+          created_at: string
+          file_name: string
+          id: string
+          kind: string
+          lesson_id: string
+          mime_type: string | null
+          position: number
+          size_bytes: number | null
+          storage_path: string | null
+          url: string | null
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          id?: string
+          kind: string
+          lesson_id: string
+          mime_type?: string | null
+          position?: number
+          size_bytes?: number | null
+          storage_path?: string | null
+          url?: string | null
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          id?: string
+          kind?: string
+          lesson_id?: string
+          mime_type?: string | null
+          position?: number
+          size_bytes?: number | null
+          storage_path?: string | null
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_files_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lessons: {
+        Row: {
+          class_id: string
+          created_at: string
+          description: string | null
+          id: string
+          position: number
+          published: boolean
+          title: string
+          topic: string | null
+          updated_at: string
+        }
+        Insert: {
+          class_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          position?: number
+          published?: boolean
+          title: string
+          topic?: string | null
+          updated_at?: string
+        }
+        Update: {
+          class_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          position?: number
+          published?: boolean
+          title?: string
+          topic?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lessons_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       parent_link_attempts: {
         Row: {
           attempted_at: string

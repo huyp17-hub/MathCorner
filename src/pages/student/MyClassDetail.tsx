@@ -1,11 +1,26 @@
 import dayjs from 'dayjs'
-import { ArrowLeft, ArrowRight, BookOpen, CalendarCheck, ClipboardList, FileText, ListChecks, Trophy } from 'lucide-react'
+import {
+  ArrowLeft,
+  ArrowRight,
+  BookOpen,
+  CalendarCheck,
+  ClipboardList,
+  ExternalLink,
+  FileText,
+  Image,
+  Link2,
+  ListChecks,
+  Music,
+  Trophy,
+  Video,
+} from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { useAuth } from '@/hooks/useAuth'
 import { listStudentAttendance } from '@/lib/api/attendance'
+import { getLessonWithFiles, listLessons, type Lesson, type LessonWithFiles } from '@/lib/api/lessons'
 import { listClassAssignments, type MyAssignment } from '@/lib/api/quiz'
 import { getMyClasses, type MyClass } from '@/lib/api/student'
 import { describeDue, formatDate } from '@/lib/format'
@@ -18,7 +33,7 @@ import {
   type AttendanceStatus,
 } from '@/lib/types'
 
-type Tab = 'assignments' | 'lessons' | 'grades'
+type Tab = 'assignments' | 'lessons' | 'attendance' | 'grades'
 
 export default function MyClassDetail() {
   const { classId } = useParams<{ classId: string }>()
@@ -52,7 +67,8 @@ export default function MyClassDetail() {
 
   const tabs: { id: Tab; label: string; icon: typeof ClipboardList }[] = [
     { id: 'assignments', label: 'BTVN', icon: ClipboardList },
-    { id: 'lessons', label: 'Điểm danh', icon: CalendarCheck },
+    { id: 'lessons', label: 'Bài giảng', icon: BookOpen },
+    { id: 'attendance', label: 'Điểm danh', icon: CalendarCheck },
     { id: 'grades', label: 'Điểm', icon: Trophy },
   ]
 
@@ -93,7 +109,8 @@ export default function MyClassDetail() {
 
       <div className="mt-4">
         {tab === 'assignments' && <AssignmentsTab classId={classId} studentId={user.id} />}
-        {tab === 'lessons' && <AttendanceTab classId={classId} studentId={user.id} />}
+        {tab === 'lessons' && <LessonsTab classId={classId} />}
+        {tab === 'attendance' && <AttendanceTab classId={classId} studentId={user.id} />}
         {tab === 'grades' && <GradesTab classId={classId} studentId={user.id} />}
       </div>
     </div>
@@ -296,6 +313,152 @@ function StatCard({
         </div>
       </CardContent>
     </Card>
+  )
+}
+
+/* ───── Tab Bài giảng ───── */
+
+const KIND_ICON: Record<string, typeof FileText> = {
+  image: Image,
+  video: Video,
+  audio: Music,
+  link: Link2,
+  document: FileText,
+}
+
+function LessonsTab({ classId }: { classId: string }) {
+  const [lessons, setLessons] = useState<Lesson[] | null>(null)
+  const [expanded, setExpanded] = useState<string | null>(null)
+  const [detail, setDetail] = useState<LessonWithFiles | null>(null)
+  const [loadingDetail, setLoadingDetail] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    listLessons(classId)
+      .then(setLessons)
+      .catch(() => {
+        setError('Không tải được bài giảng.')
+        setLessons([])
+      })
+  }, [classId])
+
+  async function toggleExpand(lessonId: string) {
+    if (expanded === lessonId) {
+      setExpanded(null)
+      setDetail(null)
+      return
+    }
+    setExpanded(lessonId)
+    setDetail(null)
+    setLoadingDetail(true)
+    try {
+      const d = await getLessonWithFiles(lessonId)
+      setDetail(d)
+    } catch {
+      setError('Không tải được tài liệu.')
+    } finally {
+      setLoadingDetail(false)
+    }
+  }
+
+  if (error && !lessons) {
+    return <p className="rounded-2xl bg-danger px-4 py-2.5 text-sm font-medium text-danger-foreground">{error}</p>
+  }
+  if (lessons === null) {
+    return <div className="h-40 animate-pulse rounded-2xl bg-black/[0.04]" />
+  }
+  if (lessons.length === 0) {
+    return (
+      <Card>
+        <CardContent className="py-12 text-center">
+          <BookOpen className="mx-auto size-10 text-muted-foreground/40" strokeWidth={1.5} />
+          <p className="mt-2 font-semibold">Chưa có bài giảng nào.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Giáo viên sẽ đăng tài liệu sớm thôi!</p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  const grouped = new Map<string, Lesson[]>()
+  for (const l of lessons) {
+    const key = l.topic || ''
+    if (!grouped.has(key)) grouped.set(key, [])
+    grouped.get(key)!.push(l)
+  }
+
+  return (
+    <div className="space-y-4">
+      {Array.from(grouped.entries()).map(([topic, items]) => (
+        <div key={topic || '__none'}>
+          {topic && (
+            <p className="mb-2 text-sm font-bold text-muted-foreground">{topic}</p>
+          )}
+          <div className="space-y-2">
+            {items.map((lesson) => (
+              <Card key={lesson.id}>
+                <CardContent className="p-0">
+                  <button
+                    onClick={() => toggleExpand(lesson.id)}
+                    className="flex w-full items-center gap-3 p-4 text-left"
+                  >
+                    <div className="grid size-10 shrink-0 place-items-center rounded-2xl bg-peach">
+                      <BookOpen className="size-5 text-foreground" strokeWidth={1.75} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold">{lesson.title}</p>
+                      {lesson.description && (
+                        <p className="mt-0.5 text-sm text-muted-foreground line-clamp-1">
+                          {lesson.description}
+                        </p>
+                      )}
+                    </div>
+                    <ArrowRight
+                      className={
+                        'size-5 shrink-0 text-muted-foreground transition-transform ' +
+                        (expanded === lesson.id ? 'rotate-90' : '')
+                      }
+                      strokeWidth={1.75}
+                    />
+                  </button>
+
+                  {expanded === lesson.id && (
+                    <div className="border-t border-border px-4 pb-4 pt-3">
+                      {loadingDetail ? (
+                        <div className="h-16 animate-pulse rounded-xl bg-black/[0.04]" />
+                      ) : detail && detail.files.length > 0 ? (
+                        <div className="space-y-1.5">
+                          {detail.files.map((f) => {
+                            const Icon = KIND_ICON[f.kind] ?? FileText
+                            const href = f.signed_url ?? f.url
+                            return (
+                              <a
+                                key={f.id}
+                                href={href ?? '#'}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="flex items-center gap-3 rounded-xl border border-border px-3 py-2 transition-colors hover:bg-black/[0.02]"
+                              >
+                                <Icon className="size-5 shrink-0 text-info" strokeWidth={1.75} />
+                                <span className="min-w-0 flex-1 truncate text-sm font-semibold">
+                                  {f.file_name}
+                                </span>
+                                <ExternalLink className="size-4 shrink-0 text-muted-foreground" strokeWidth={1.75} />
+                              </a>
+                            )
+                          })}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">Chưa có tài liệu đính kèm.</p>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
   )
 }
 

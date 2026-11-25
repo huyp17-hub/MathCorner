@@ -16,13 +16,15 @@ import {
 import type { Class } from '@/lib/types'
 import { BillingPanel } from './class-detail/BillingPanel'
 import { ImportPanel } from './class-detail/ImportPanel'
+import { LessonsPanel } from './class-detail/LessonsPanel'
 import { StudentsPanel } from './class-detail/StudentsPanel'
 
-type Tab = 'students' | 'import' | 'billing'
+type Tab = 'students' | 'import' | 'lessons' | 'billing'
 
 const tabs: { id: Tab; label: string }[] = [
   { id: 'students', label: 'Học sinh' },
   { id: 'import', label: 'Thêm hàng loạt' },
+  { id: 'lessons', label: 'Bài giảng' },
   { id: 'billing', label: 'Học phí' },
 ]
 
@@ -151,6 +153,7 @@ export default function ClassDetail() {
       <div className="mt-5">
         {tab === 'students' && <StudentsPanel classId={cls.id} />}
         {tab === 'import' && <ImportPanel classId={cls.id} />}
+        {tab === 'lessons' && <LessonsPanel classId={cls.id} />}
         {tab === 'billing' && <BillingPanel cls={cls} onSaved={(c) => setCls(c)} />}
       </div>
 
