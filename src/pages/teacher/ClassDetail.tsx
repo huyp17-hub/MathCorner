@@ -14,23 +14,27 @@ import {
   updateClass,
 } from '@/lib/api/classes'
 import type { Class } from '@/lib/types'
+import { ChatPanel } from '@/components/ChatPanel'
+import { useAuth } from '@/hooks/useAuth'
 import { BillingPanel } from './class-detail/BillingPanel'
 import { ImportPanel } from './class-detail/ImportPanel'
 import { LessonsPanel } from './class-detail/LessonsPanel'
 import { StudentsPanel } from './class-detail/StudentsPanel'
 
-type Tab = 'students' | 'import' | 'lessons' | 'billing'
+type Tab = 'students' | 'import' | 'lessons' | 'chat' | 'billing'
 
 const tabs: { id: Tab; label: string }[] = [
   { id: 'students', label: 'Học sinh' },
   { id: 'import', label: 'Thêm hàng loạt' },
   { id: 'lessons', label: 'Bài giảng' },
+  { id: 'chat', label: 'Thông báo' },
   { id: 'billing', label: 'Học phí' },
 ]
 
 export default function ClassDetail() {
   const { classId } = useParams<{ classId: string }>()
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [cls, setCls] = useState<Class | null>(null)
   const [notFound, setNotFound] = useState(false)
   const [tab, setTab] = useState<Tab>('students')
@@ -154,6 +158,9 @@ export default function ClassDetail() {
         {tab === 'students' && <StudentsPanel classId={cls.id} />}
         {tab === 'import' && <ImportPanel classId={cls.id} />}
         {tab === 'lessons' && <LessonsPanel classId={cls.id} />}
+        {tab === 'chat' && user && (
+          <ChatPanel classId={cls.id} userId={user.id} userRole="teacher" />
+        )}
         {tab === 'billing' && <BillingPanel cls={cls} onSaved={(c) => setCls(c)} />}
       </div>
 

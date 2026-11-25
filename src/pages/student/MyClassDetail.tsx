@@ -10,12 +10,14 @@ import {
   Image,
   Link2,
   ListChecks,
+  MessageCircle,
   Music,
   Trophy,
   Video,
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
+import { ChatPanel } from '@/components/ChatPanel'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { useAuth } from '@/hooks/useAuth'
@@ -33,7 +35,7 @@ import {
   type AttendanceStatus,
 } from '@/lib/types'
 
-type Tab = 'assignments' | 'lessons' | 'attendance' | 'grades'
+type Tab = 'assignments' | 'lessons' | 'chat' | 'attendance' | 'grades'
 
 export default function MyClassDetail() {
   const { classId } = useParams<{ classId: string }>()
@@ -68,6 +70,7 @@ export default function MyClassDetail() {
   const tabs: { id: Tab; label: string; icon: typeof ClipboardList }[] = [
     { id: 'assignments', label: 'BTVN', icon: ClipboardList },
     { id: 'lessons', label: 'Bài giảng', icon: BookOpen },
+    { id: 'chat', label: 'Thông báo', icon: MessageCircle },
     { id: 'attendance', label: 'Điểm danh', icon: CalendarCheck },
     { id: 'grades', label: 'Điểm', icon: Trophy },
   ]
@@ -110,6 +113,9 @@ export default function MyClassDetail() {
       <div className="mt-4">
         {tab === 'assignments' && <AssignmentsTab classId={classId} studentId={user.id} />}
         {tab === 'lessons' && <LessonsTab classId={classId} />}
+        {tab === 'chat' && (
+          <ChatPanel classId={classId} userId={user.id} userRole="student" />
+        )}
         {tab === 'attendance' && <AttendanceTab classId={classId} studentId={user.id} />}
         {tab === 'grades' && <GradesTab classId={classId} studentId={user.id} />}
       </div>
