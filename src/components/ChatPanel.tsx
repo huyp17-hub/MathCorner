@@ -6,6 +6,7 @@ import {
   Pin,
   Reply,
   Send,
+  Share2,
   Trash2,
   X,
 } from 'lucide-react'
@@ -125,6 +126,18 @@ export function ChatPanel({ classId, userId, userRole }: ChatPanelProps) {
   function autoResize(el: HTMLTextAreaElement) {
     el.style.height = 'auto'
     el.style.height = Math.min(el.scrollHeight, 120) + 'px'
+  }
+
+  function shareToZalo(msg: ClassMessage) {
+    const sender = msg.sender?.full_name ?? 'Giáo viên'
+    const time = dayjs(msg.created_at).format('DD/MM HH:mm')
+    const body = `[Thông báo lớp học]\n${sender} (${time}):\n${msg.content}`
+    const encoded = encodeURIComponent(body)
+    window.open(
+      `https://zalo.me/share?text=${encoded}`,
+      '_blank',
+      'noopener',
+    )
   }
 
   const pinnedMessages = messages.filter((m) => m.pinned)
@@ -265,6 +278,13 @@ export function ChatPanel({ classId, userId, userRole }: ChatPanelProps) {
                           title="Trả lời"
                         >
                           <Reply className="size-3.5 text-muted-foreground" strokeWidth={1.75} />
+                        </button>
+                        <button
+                          onClick={() => shareToZalo(msg)}
+                          className="rounded-lg p-1 hover:bg-black/[0.06]"
+                          title="Chia sẻ qua Zalo"
+                        >
+                          <Share2 className="size-3.5 text-blue-500" strokeWidth={1.75} />
                         </button>
                         {userRole === 'teacher' && (
                           <button
