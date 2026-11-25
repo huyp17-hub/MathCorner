@@ -1,6 +1,7 @@
 import { ArrowLeft, Eye, PenLine } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router'
+import { MarkdownContent } from '@/components/MarkdownContent'
 import QuizResult from '@/pages/student/QuizResult'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -9,10 +10,10 @@ import { Dialog } from '@/components/ui/dialog'
 import { Input, Label } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import {
-  getEssayDetail,
+  getEssayDetailWithQuestions,
   gradeEssay,
   overviewSubmissions,
-  type EssayDetail,
+  type EssayDetailWithQuestions,
   type Overview,
   type OverviewRow,
 } from '@/lib/api/submissions'
@@ -141,10 +142,11 @@ export default function SubmissionsOverview() {
         </>
       ) : null}
 
-      {grading && grading.submission_id && (
+      {grading && grading.submission_id && assignmentId && (
         <GradeEssayDialog
           row={grading}
           submissionId={grading.submission_id}
+          assignmentId={assignmentId}
           onClose={() => setGrading(null)}
           onDone={() => {
             setGrading(null)
@@ -181,15 +183,17 @@ function Stat({ label, value }: { label: string; value: string }) {
 function GradeEssayDialog({
   row,
   submissionId,
+  assignmentId,
   onClose,
   onDone,
 }: {
   row: OverviewRow
   submissionId: string
+  assignmentId: string
   onClose: () => void
   onDone: () => void
 }) {
-  const [detail, setDetail] = useState<EssayDetail | null>(null)
+  const [detail, setDetail] = useState<EssayDetailWithQuestions | null>(null)
   const [score, setScore] = useState('')
   const [maxScore, setMaxScore] = useState('10')
   const [comment, setComment] = useState('')
@@ -198,7 +202,7 @@ function GradeEssayDialog({
 
   useEffect(() => {
     let active = true
-    getEssayDetail(submissionId)
+    getEssayDetailWithQuestions(submissionId, assignmentId)
       .then((d) => {
         if (!active) return
         setDetail(d)
@@ -210,7 +214,7 @@ function GradeEssayDialog({
     return () => {
       active = false
     }
-  }, [submissionId])
+  }, [submissionId, assignmentId])
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault()
@@ -249,36 +253,81 @@ function GradeEssayDialog({
         <div className="h-32 animate-pulse rounded-2xl bg-black/[0.04]" />
       ) : (
         <div className="space-y-4">
-          <div className="rounded-2xl bg-background p-3">
-            <p className="text-xs font-semibold text-muted-foreground">Bài làm của học sinh</p>
-            {detail.essay_text ? (
-              <p className="mt-1 whitespace-pre-wrap text-[15px]">{detail.essay_text}</p>
-            ) : (
-              <p className="mt-1 text-sm text-muted-foreground">Không có phần trả lời bằng chữ.</p>
-            )}
-            {detail.files.length > 0 && (
-              <ul className="mt-2 space-y-1">
-                {detail.files.map((f) =>
-                  f.url ? (
-                    <li key={f.id}>
-                      <a
-                        href={f.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-sm font-semibold text-info hover:underline"
-                      >
+          {detail.questions.length > 0 ? (
+            <div className="max-h-96 space-y-3 overflow-y-auto">
+              {detail.questions.map((q, i) => (
+                <div key={q.question_id} className="rounded-2xl bg-background p-3">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-sm font-bold">Câu {i + 1}</span>
+                    <span className="text-xs text-muted-foreground">{q.points} điểm</span>
+                  </div>
+                  <div className="mt-1 text-sm">
+                    <MarkdownContent>{q.content}</MarkdownContent>
+                  </div>
+
+                  {q.files.length > 0 && (
+                    <div className="mt-2 space-y-1">
+                      {q.files.map((f) =>
+                        f.url ? (
+                          <a
+                            key={f.id}
+                            href={f.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="block text-sm font-semibold text-info hover:underline"
+                          >
+                            📎 {f.file_name}
+                          </a>
+                        ) : (
+                          <p key={f.id} className="text-sm text-muted-foreground">
+                            📎 {f.file_name}
+                          </p>
+                        ),
+                      )}
+                    </div>
+                  )}
+
+                  <div className="mt-2 rounded-xl border border-border px-3 py-2">
+                    <p className="text-xs font-semibold text-muted-foreground">Đáp án cuối cùng</p>
+                    <p className="mt-0.5 text-[15px]">
+                      {q.text_answer || <span className="text-muted-foreground">Chưa điền</span>}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-2xl bg-background p-3">
+              <p className="text-xs font-semibold text-muted-foreground">Bài làm của học sinh</p>
+              {detail.essay_text ? (
+                <p className="mt-1 whitespace-pre-wrap text-[15px]">{detail.essay_text}</p>
+              ) : (
+                <p className="mt-1 text-sm text-muted-foreground">Không có phần trả lời bằng chữ.</p>
+              )}
+              {detail.files.length > 0 && (
+                <ul className="mt-2 space-y-1">
+                  {detail.files.map((f) =>
+                    f.url ? (
+                      <li key={f.id}>
+                        <a
+                          href={f.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-sm font-semibold text-info hover:underline"
+                        >
+                          {f.file_name}
+                        </a>
+                      </li>
+                    ) : (
+                      <li key={f.id} className="text-sm text-muted-foreground">
                         {f.file_name}
-                      </a>
-                    </li>
-                  ) : (
-                    <li key={f.id} className="text-sm text-muted-foreground">
-                      {f.file_name}
-                    </li>
-                  ),
-                )}
-              </ul>
-            )}
-          </div>
+                      </li>
+                    ),
+                  )}
+                </ul>
+              )}
+            </div>
+          )}
 
           <form id="grade-form" onSubmit={onSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-3">

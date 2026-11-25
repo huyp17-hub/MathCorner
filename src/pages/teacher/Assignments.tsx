@@ -102,10 +102,9 @@ export default function Assignments() {
         <AssignmentFormDialog
           mode="create"
           onClose={() => setCreating(false)}
-          onCreated={(created, type) => {
+          onCreated={(created) => {
             setCreating(false)
-            if (type === 'quiz') navigate(`/teacher/assignments/${created}`)
-            else void load()
+            navigate(`/teacher/assignments/${created}`)
           }}
           classId={classId}
         />
@@ -170,17 +169,13 @@ function AssignmentCard({
             )}
           </div>
           <p className="mt-1.5 truncate font-semibold">{row.title}</p>
-          {row.type === 'quiz' && (
-            <p className="text-sm text-muted-foreground">{row.question_count} câu hỏi</p>
-          )}
+          <p className="text-sm text-muted-foreground">{row.question_count} câu hỏi</p>
         </div>
         <div className="flex shrink-0 flex-wrap gap-2">
-          {row.type === 'quiz' && (
-            <Button variant="soft" size="sm" onClick={onCompose}>
-              <ListChecks className="size-4" strokeWidth={1.75} aria-hidden="true" />
-              Soạn đề
-            </Button>
-          )}
+          <Button variant="soft" size="sm" onClick={onCompose}>
+            <ListChecks className="size-4" strokeWidth={1.75} aria-hidden="true" />
+            Soạn đề
+          </Button>
           <Button variant="outline" size="sm" onClick={onSubmissions}>
             <Users className="size-4" strokeWidth={1.75} aria-hidden="true" />
             Bài nộp
@@ -227,7 +222,7 @@ function AssignmentFormDialog(
         mode: 'create'
         classId: string
         onClose: () => void
-        onCreated: (id: string, type: AssignmentType) => void
+        onCreated: (id: string) => void
       }
     | {
         mode: 'edit'
@@ -278,7 +273,7 @@ function AssignmentFormDialog(
           ...form,
           description: form.description?.trim() || null,
         })
-        props.onCreated(created.id, created.type)
+        props.onCreated(created.id)
       } else {
         await updateAssignment(props.initial.id, {
           ...form,
@@ -426,7 +421,7 @@ function AssignmentFormDialog(
             {error}
           </p>
         )}
-        {props.mode === 'create' && form.type === 'quiz' && (
+        {props.mode === 'create' && (
           <p className="text-sm text-muted-foreground">Tạo xong sẽ mở màn soạn câu hỏi.</p>
         )}
       </form>

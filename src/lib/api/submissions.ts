@@ -1,6 +1,6 @@
 import { getAssignment } from '@/lib/api/assignments'
 import { listMembers } from '@/lib/api/classes'
-import { listSubmissionFiles, signedFileUrl, type SubmissionFile } from '@/lib/api/quiz'
+import { getQuestionIdFromPath, listSubmissionFiles, signedFileUrl, type SubmissionFile } from '@/lib/api/quiz'
 import { supabase } from '@/lib/supabase'
 import type { AssignmentType, SubmissionStatus } from '@/lib/types'
 
@@ -94,6 +94,76 @@ export async function getEssayDetail(submissionId: string): Promise<EssayDetail>
     submitted_at: s.submitted_at,
     files: withUrls,
   }
+}
+
+// ---- Chi tiết từng câu tự luận (dùng khi có câu hỏi) ----
+
+export interface EssayQuestionAnswer {
+  question_id: string
+  content: string
+  points: number
+  order_index: number
+  text_answer: string | null
+  files: (SubmissionFile & { url: string | null })[]
+}
+
+export interface EssayDetailWithQuestions extends EssayDetail {
+  questions: EssayQuestionAnswer[]
+}
+
+export async function getEssayDetailWithQuestions(
+  submissionId: string,
+  assignmentId: string,
+): Promise<EssayDetailWithQuestions> {
+  const detail = await getEssayDetail(submissionId)
+
+  const { data: questions, error: qErr } = await supabase
+    .from('questions')
+    .select('id, content, points, order_index')
+    .eq('assignment_id', assignmentId)
+    .order('order_index', { ascending: true })
+  if (qErr) throw qErr
+
+  if (!questions || questions.length === 0) {
+    return { ...detail, questions: [] }
+  }
+
+  const { data: answers } = await supabase
+    .from('answers')
+    .select('question_id, text_answer')
+    .eq('submission_id', submissionId)
+
+  const answerMap = new Map((answers ?? []).map((a) => [a.question_id, a]))
+
+  const allFiles = await listSubmissionFiles(submissionId)
+  const filesByQuestion = new Map<string, typeof allFiles>()
+  for (const f of allFiles) {
+    const qId = getQuestionIdFromPath(f.storage_path)
+    if (qId) {
+      if (!filesByQuestion.has(qId)) filesByQuestion.set(qId, [])
+      filesByQuestion.get(qId)!.push(f)
+    }
+  }
+
+  const questionDetails = await Promise.all(
+    questions.map(async (q) => {
+      const answer = answerMap.get(q.id)
+      const qFiles = filesByQuestion.get(q.id) ?? []
+      const filesWithUrls = await Promise.all(
+        qFiles.map(async (f) => ({ ...f, url: await signedFileUrl(f.storage_path) })),
+      )
+      return {
+        question_id: q.id,
+        content: q.content,
+        points: Number(q.points),
+        order_index: q.order_index,
+        text_answer: answer?.text_answer ?? null,
+        files: filesWithUrls,
+      }
+    }),
+  )
+
+  return { ...detail, questions: questionDetails }
 }
 
 /** Giáo viên chấm tự luận: ghi điểm + nhận xét, đánh dấu đã chấm. */

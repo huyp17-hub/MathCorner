@@ -278,6 +278,30 @@ export async function getLatestSubmission(
   return data
 }
 
+// ---- Câu hỏi tự luận (đề bài, dùng cho học sinh) ----
+
+export interface EssayQuestion {
+  id: string
+  content: string
+  points: number
+  order_index: number
+}
+
+export async function loadEssayQuestions(assignmentId: string): Promise<EssayQuestion[]> {
+  const { data, error } = await supabase
+    .from('questions')
+    .select('id, content, points, order_index')
+    .eq('assignment_id', assignmentId)
+    .order('order_index', { ascending: true })
+  if (error) throw error
+  return (data ?? []).map((q) => ({ ...q, points: Number(q.points) }))
+}
+
+export function getQuestionIdFromPath(path: string): string | null {
+  const match = path.match(/\/q-([0-9a-f-]+)\//)
+  return match ? match[1] : null
+}
+
 // ---- Nộp file (tự luận) ----
 
 export interface SubmissionFile {
@@ -303,9 +327,11 @@ export async function uploadSubmissionFile(
   studentId: string,
   submissionId: string,
   file: File,
+  questionId?: string,
 ): Promise<SubmissionFile> {
   const safeName = file.name.replace(/[^\w.\- ]+/g, '_')
-  const path = `${assignmentId}/${studentId}/${submissionId}/${Date.now()}-${safeName}`
+  const questionPrefix = questionId ? `q-${questionId}/` : ''
+  const path = `${assignmentId}/${studentId}/${submissionId}/${questionPrefix}${Date.now()}-${safeName}`
   const { error: upErr } = await supabase.storage.from('submissions').upload(path, file, {
     contentType: file.type || undefined,
     upsert: false,

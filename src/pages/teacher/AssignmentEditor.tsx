@@ -45,6 +45,8 @@ const kindLabel: Record<Exclude<QuestionKind, 'drag_drop'>, string> = {
   short_answer: 'Trả lời ngắn',
 }
 
+const quizKinds: Exclude<QuestionKind, 'drag_drop'>[] = ['multiple_choice', 'true_false', 'short_answer']
+
 const STATEMENT_LETTERS = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
 const ACCEPTED_IMAGE_TYPES = 'image/png,image/jpeg,image/gif,image/webp'
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024
@@ -84,9 +86,10 @@ function blankQuestion(kind: Exclude<QuestionKind, 'drag_drop'>): EditorQuestion
 }
 
 /** Lỗi từng câu (hiển thị khi bấm Lưu). */
-function validate(q: EditorQuestion): string | null {
+function validate(q: EditorQuestion, isEssayAssignment = false): string | null {
   if (!q.content.trim()) return 'Chưa nhập nội dung câu hỏi.'
   if (!(q.points > 0)) return 'Điểm phải lớn hơn 0.'
+  if (isEssayAssignment) return null
   if (q.kind === 'multiple_choice') {
     const filled = q.choices.filter((c) => c.content.trim())
     if (filled.length < 2) return 'Cần ít nhất 2 phương án.'
@@ -192,9 +195,11 @@ export default function AssignmentEditor() {
     await exportQuestionsToExcel(questions, `${assignment.title}.xlsx`)
   }
 
+  const isEssay = assignment?.type === 'essay'
+
   const errors = useMemo(
-    () => (questions ? questions.map(validate) : []),
-    [questions],
+    () => (questions ? questions.map((q) => validate(q, isEssay)) : []),
+    [questions, isEssay],
   )
 
   async function onSave() {
@@ -259,12 +264,19 @@ export default function AssignmentEditor() {
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2">
-        {(Object.keys(kindLabel) as Exclude<QuestionKind, 'drag_drop'>[]).map((k) => (
-          <Button key={k} variant="soft" size="sm" onClick={() => add(k)}>
+        {isEssay ? (
+          <Button variant="soft" size="sm" onClick={() => add('short_answer')}>
             <Plus className="size-4" strokeWidth={1.75} aria-hidden="true" />
-            {kindLabel[k]}
+            Thêm câu tự luận
           </Button>
-        ))}
+        ) : (
+          quizKinds.map((k) => (
+            <Button key={k} variant="soft" size="sm" onClick={() => add(k)}>
+              <Plus className="size-4" strokeWidth={1.75} aria-hidden="true" />
+              {kindLabel[k]}
+            </Button>
+          ))
+        )}
         <span className="mx-1 self-center text-border">|</span>
         <Button
           variant="outline"
@@ -308,7 +320,9 @@ export default function AssignmentEditor() {
             />
             <p className="mt-2 font-semibold">Đề chưa có câu nào</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              Chọn một loại câu ở trên để bắt đầu soạn.
+              {isEssay
+                ? 'Bấm "Thêm câu tự luận" để thêm câu hỏi vào đề.'
+                : 'Chọn một loại câu ở trên để bắt đầu soạn.'}
             </p>
           </CardContent>
         </Card>
@@ -325,6 +339,7 @@ export default function AssignmentEditor() {
               onRemove={() => remove(i)}
               onMove={(dir) => move(i, dir)}
               teacherId={user?.id ?? ''}
+              isEssayAssignment={isEssay}
             />
           ))}
         </div>
@@ -392,6 +407,7 @@ function QuestionEditorCard({
   onRemove,
   onMove,
   teacherId,
+  isEssayAssignment = false,
 }: {
   index: number
   total: number
@@ -401,6 +417,7 @@ function QuestionEditorCard({
   onRemove: () => void
   onMove: (dir: -1 | 1) => void
   teacherId: string
+  isEssayAssignment?: boolean
 }) {
   function setChoice(idx: number, patch: Partial<EditorQuestion['choices'][number]>) {
     const choices = q.choices.map((c, i) => (i === idx ? { ...c, ...patch } : c))
@@ -419,7 +436,7 @@ function QuestionEditorCard({
               {index + 1}
             </span>
             <Badge tone="neutral" variant="soft">
-              {q.kind === 'drag_drop' ? 'Kéo thả' : kindLabel[q.kind]}
+              {isEssayAssignment ? 'Tự luận' : q.kind === 'drag_drop' ? 'Kéo thả' : kindLabel[q.kind]}
             </Badge>
           </div>
           <div className="flex items-center gap-1">
@@ -475,11 +492,11 @@ function QuestionEditorCard({
           />
         </div>
 
-        {q.kind === 'multiple_choice' && (
+        {!isEssayAssignment && q.kind === 'multiple_choice' && (
           <MultipleChoiceEditor q={q} onChange={onChange} setChoice={setChoice} pickSingle={pickSingleCorrect} />
         )}
-        {q.kind === 'true_false' && <TrueFalseEditor q={q} onChange={onChange} setChoice={setChoice} />}
-        {q.kind === 'short_answer' && <ShortAnswerEditor q={q} onChange={onChange} />}
+        {!isEssayAssignment && q.kind === 'true_false' && <TrueFalseEditor q={q} onChange={onChange} setChoice={setChoice} />}
+        {!isEssayAssignment && q.kind === 'short_answer' && <ShortAnswerEditor q={q} onChange={onChange} />}
 
         <div className="flex flex-wrap items-end gap-3 border-t border-border pt-3">
           <div className="w-28">
