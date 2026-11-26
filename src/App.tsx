@@ -17,6 +17,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { roleHome } from '@/lib/types'
 import Login from '@/pages/auth/Login'
 import Register from '@/pages/auth/Register'
+import Landing from '@/pages/Landing'
 import ChildAssignments from '@/pages/parent/ChildAssignments'
 import ChildAttendance from '@/pages/parent/ChildAttendance'
 import ChildTuition from '@/pages/parent/ChildTuition'
@@ -28,6 +29,7 @@ import MyClasses from '@/pages/student/MyClasses'
 import MyClassDetail from '@/pages/student/MyClassDetail'
 import StudentAssignments from '@/pages/student/Assignments'
 import AssignmentRunner from '@/pages/student/AssignmentRunner'
+import UserProfile from '@/pages/UserProfile'
 import Styleguide from '@/pages/Styleguide'
 import TeacherAssignments from '@/pages/teacher/Assignments'
 import AssignmentEditor from '@/pages/teacher/AssignmentEditor'
@@ -63,12 +65,12 @@ const parentNav: NavItem[] = [
   { to: '/parent/link', label: 'Liên kết', icon: LinkIcon },
 ]
 
-/** Về trang chủ đúng vai trò, hoặc /login nếu chưa đăng nhập. */
+/** Về trang chủ đúng vai trò, hoặc landing nếu chưa đăng nhập. */
 function HomeRedirect() {
   const { loading, session, profile } = useAuth()
   if (loading) return <FullScreenLoader />
   if (session && profile) return <Navigate to={roleHome[profile.role]} replace />
-  return <Navigate to="/login" replace />
+  return <Landing />
 }
 
 /** Trang công khai (login/register): nếu đã đăng nhập thì đưa về trang chủ. */
@@ -121,6 +123,7 @@ export default function App() {
           element={<SubmissionsOverview />}
         />
         <Route path="/teacher/gradebook" element={<Gradebook />} />
+        <Route path="/profile" element={<UserProfile />} />
       </Route>
 
       {/* Học sinh */}
@@ -137,6 +140,7 @@ export default function App() {
         <Route path="/student/assignments" element={<StudentAssignments />} />
         <Route path="/student/assignments/:assignmentId" element={<AssignmentRunner />} />
         <Route path="/student/attendance" element={<MyAttendance />} />
+        <Route path="/profile" element={<UserProfile />} />
       </Route>
 
       {/* Phụ huynh */}
@@ -152,6 +156,7 @@ export default function App() {
         <Route path="/parent/assignments" element={<ChildAssignments />} />
         <Route path="/parent/attendance" element={<ChildAttendance />} />
         <Route path="/parent/tuition" element={<ChildTuition />} />
+        <Route path="/profile" element={<UserProfile />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

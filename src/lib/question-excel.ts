@@ -144,6 +144,8 @@ export async function parseQuestionsFromExcel(
         choices,
         answer_keys: [''],
         explanation,
+        section_id: null,
+        group_id: null,
       })
     } else if (kind === 'true_false') {
       if (filled.length < 1) {
@@ -179,6 +181,8 @@ export async function parseQuestionsFromExcel(
         choices,
         answer_keys: [''],
         explanation,
+        section_id: null,
+        group_id: null,
       })
     } else if (kind === 'short_answer') {
       if (!ansStr) {
@@ -202,6 +206,8 @@ export async function parseQuestionsFromExcel(
         choices: [],
         answer_keys: keys,
         explanation,
+        section_id: null,
+        group_id: null,
       })
     }
   }

@@ -166,6 +166,28 @@ export interface QuizQuestion {
   flagged: boolean
   time_spent_seconds: number
   choices: QuizChoice[]
+  group_id: string | null
+  section_id: string | null
+}
+
+export interface QuizSection {
+  id: string
+  title: string
+  order_index: number
+  time_limit_minutes: number
+  status: 'not_started' | 'active' | 'finished'
+  started_at: string | null
+  finished_at: string | null
+  deadline: string | null
+  paused_seconds: number
+}
+
+export interface QuizGroup {
+  id: string
+  title: string | null
+  content: string
+  section_id: string | null
+  order_index: number
 }
 
 export interface QuizData {
@@ -181,6 +203,9 @@ export interface QuizData {
   started_at: string
   deadline: string | null
   status: SubmissionStatus
+  sections: QuizSection[]
+  active_section_id: string | null
+  groups: QuizGroup[]
   questions: QuizQuestion[]
 }
 
@@ -249,10 +274,52 @@ export interface ReviewQuestion extends QuizQuestion {
   choices: (QuizChoice & { is_correct?: boolean; blank_no?: number | null })[]
 }
 
-export interface QuizReview extends Omit<QuizData, 'questions'> {
+export interface ReviewSection extends QuizSection {
   score: number | null
   max_score: number | null
+}
+
+export interface QuizReview extends Omit<QuizData, 'questions' | 'sections'> {
+  score: number | null
+  max_score: number | null
+  sections: ReviewSection[]
   questions: ReviewQuestion[]
+}
+
+// ---- TSA: Phần thi ----
+
+export async function startSection(submissionId: string, sectionId: string): Promise<QuizData> {
+  const { data, error } = await supabase.rpc('start_section', {
+    p_submission_id: submissionId,
+    p_section_id: sectionId,
+  })
+  if (error) throw error
+  return data as unknown as QuizData
+}
+
+export async function finishSection(submissionId: string, sectionId: string): Promise<QuizData> {
+  const { data, error } = await supabase.rpc('finish_section', {
+    p_submission_id: submissionId,
+    p_section_id: sectionId,
+  })
+  if (error) throw error
+  return data as unknown as QuizData
+}
+
+export async function pauseAttempt(submissionId: string): Promise<QuizData> {
+  const { data, error } = await supabase.rpc('pause_attempt', {
+    p_submission_id: submissionId,
+  })
+  if (error) throw error
+  return data as unknown as QuizData
+}
+
+export async function resumeAttempt(submissionId: string): Promise<QuizData> {
+  const { data, error } = await supabase.rpc('resume_attempt', {
+    p_submission_id: submissionId,
+  })
+  if (error) throw error
+  return data as unknown as QuizData
 }
 
 export async function getQuizReview(submissionId: string): Promise<QuizReview> {

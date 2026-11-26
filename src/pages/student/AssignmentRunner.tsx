@@ -9,6 +9,7 @@ import type { Assignment } from '@/lib/types'
 import QuizResult from './QuizResult'
 import SubmitEssay from './SubmitEssay'
 import TakeQuiz from './TakeQuiz'
+import TakeTsa from './TakeTsa'
 
 type QuizView =
   | { kind: 'take'; nonce: number }
@@ -94,6 +95,32 @@ export default function AssignmentRunner() {
 
   // quiz
   const canRetake = lastAttemptNo > 0 && lastAttemptNo < assignment.max_attempts
+  const isTsa = assignment.exam_format === 'tsa'
+
+  const handleQuizSubmitted = async (sid: string) => {
+    const sub = await getLatestSubmission(assignmentId, user.id).catch(() => null)
+    setLastAttemptNo(sub?.attempt_no ?? lastAttemptNo)
+    setQuizView({
+      kind: 'review',
+      submissionId: sid,
+      summary: {
+        score: sub?.score != null ? Number(sub.score) : null,
+        max_score: sub?.max_score != null ? Number(sub.max_score) : null,
+      },
+    })
+  }
+
+  // TSA sử dụng giao diện phòng thi riêng (toàn màn hình)
+  if (isTsa && quizView?.kind === 'take') {
+    return (
+      <TakeTsa
+        key={quizView.nonce}
+        assignmentId={assignmentId}
+        onExit={back}
+        onSubmitted={handleQuizSubmitted}
+      />
+    )
+  }
 
   return (
     <div>
@@ -104,18 +131,7 @@ export default function AssignmentRunner() {
             key={quizView.nonce}
             assignmentId={assignmentId}
             onExit={back}
-            onSubmitted={async (sid) => {
-              const sub = await getLatestSubmission(assignmentId, user.id).catch(() => null)
-              setLastAttemptNo(sub?.attempt_no ?? lastAttemptNo)
-              setQuizView({
-                kind: 'review',
-                submissionId: sid,
-                summary: {
-                  score: sub?.score != null ? Number(sub.score) : null,
-                  max_score: sub?.max_score != null ? Number(sub.max_score) : null,
-                },
-              })
-            }}
+            onSubmitted={handleQuizSubmitted}
           />
         )}
         {quizView?.kind === 'review' && (

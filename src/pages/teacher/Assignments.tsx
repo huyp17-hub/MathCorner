@@ -1,4 +1,4 @@
-import { FileText, ListChecks, Pencil, Plus, Trash2, Users } from 'lucide-react'
+import { FileText, GraduationCap, ListChecks, Pencil, Plus, Trash2, Users } from 'lucide-react'
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router'
 import { ClassPicker } from '@/components/ClassPicker'
@@ -11,6 +11,7 @@ import { Select } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import {
   createAssignment,
+  createTsaAssignment,
   deleteAssignment,
   listAssignments,
   updateAssignment,
@@ -26,6 +27,7 @@ export default function Assignments() {
   const [rows, setRows] = useState<AssignmentRow[] | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [creating, setCreating] = useState(false)
+  const [creatingTsa, setCreatingTsa] = useState(false)
   const [editing, setEditing] = useState<AssignmentRow | null>(null)
   const [deleting, setDeleting] = useState<AssignmentRow | null>(null)
 
@@ -52,10 +54,16 @@ export default function Assignments() {
           <h1 className="text-2xl font-bold tracking-tight md:text-3xl">Bài tập</h1>
           <p className="mt-1 text-muted-foreground">Giao bài trắc nghiệm hoặc tự luận cho lớp.</p>
         </div>
-        <Button onClick={() => setCreating(true)} disabled={!classId}>
-          <Plus className="size-4" strokeWidth={1.75} aria-hidden="true" />
-          Tạo bài tập
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button onClick={() => setCreating(true)} disabled={!classId}>
+            <Plus className="size-4" strokeWidth={1.75} aria-hidden="true" />
+            Tạo bài tập
+          </Button>
+          <Button variant="outline" onClick={() => setCreatingTsa(true)} disabled={!classId}>
+            <GraduationCap className="size-4" strokeWidth={1.75} aria-hidden="true" />
+            Tạo đề TSA
+          </Button>
+        </div>
       </div>
 
       <div className="mt-4">
@@ -109,6 +117,16 @@ export default function Assignments() {
           classId={classId}
         />
       )}
+      {creatingTsa && classId && (
+        <TsaCreateDialog
+          classId={classId}
+          onClose={() => setCreatingTsa(false)}
+          onCreated={(id) => {
+            setCreatingTsa(false)
+            navigate(`/teacher/assignments/${id}`)
+          }}
+        />
+      )}
       {editing && (
         <AssignmentFormDialog
           mode="edit"
@@ -158,6 +176,12 @@ function AssignmentCard({
               <Icon className="size-3.5" strokeWidth={2} aria-hidden="true" />
               {assignmentTypeLabel[row.type]}
             </Badge>
+            {row.exam_format === 'tsa' && (
+              <Badge tone="ok" variant="soft">
+                <GraduationCap className="size-3.5" strokeWidth={2} aria-hidden="true" />
+                TSA
+              </Badge>
+            )}
             {due.overdue ? (
               <Badge tone="danger" variant="soft">
                 {due.text}
@@ -500,6 +524,92 @@ function ConfirmDeleteDialog({
           {error}
         </p>
       )}
+    </Dialog>
+  )
+}
+
+function TsaCreateDialog({
+  classId,
+  onClose,
+  onCreated,
+}: {
+  classId: string
+  onClose: () => void
+  onCreated: (id: string) => void
+}) {
+  const [title, setTitle] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function onSubmit(e: FormEvent) {
+    e.preventDefault()
+    const trimmed = title.trim()
+    if (!trimmed) {
+      setError('Bạn hãy nhập tên đề thi.')
+      return
+    }
+    setSaving(true)
+    setError(null)
+    try {
+      const now = new Date()
+      const due = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000)
+      const created = await createTsaAssignment(classId, {
+        title: trimmed,
+        description: null,
+        type: 'quiz',
+        open_at: now.toISOString(),
+        due_at: due.toISOString(),
+        allow_late: false,
+        time_limit_minutes: null,
+        max_attempts: 1,
+        shuffle: false,
+        show_answers: 'after_due',
+      })
+      onCreated(created.id)
+    } catch {
+      setError('Không tạo được đề TSA. Bạn thử lại nhé.')
+      setSaving(false)
+    }
+  }
+
+  return (
+    <Dialog
+      open
+      onClose={onClose}
+      title="Tạo đề TSA"
+      description="Tạo khung đề TSA gồm 3 phần: Toán (60 phút), Đọc hiểu (30 phút), Khoa học (60 phút)."
+      footer={
+        <>
+          <Button variant="outline" onClick={onClose} disabled={saving}>
+            Huỷ
+          </Button>
+          <Button type="submit" form="tsa-form" loading={saving}>
+            Tạo
+          </Button>
+        </>
+      }
+    >
+      <form id="tsa-form" onSubmit={onSubmit} className="space-y-4">
+        <div>
+          <Label htmlFor="tsa-title">Tên đề thi</Label>
+          <Input
+            id="tsa-title"
+            required
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="VD: Đề luyện TSA số 1"
+            autoFocus
+          />
+        </div>
+        {error && (
+          <p className="rounded-2xl bg-danger px-4 py-2.5 text-sm font-medium text-danger-foreground">
+            {error}
+          </p>
+        )}
+        <p className="text-sm text-muted-foreground">
+          Tạo xong sẽ mở màn soạn câu hỏi theo từng phần.
+        </p>
+      </form>
     </Dialog>
   )
 }

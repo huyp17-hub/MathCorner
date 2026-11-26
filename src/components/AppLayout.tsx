@@ -1,26 +1,53 @@
-import { LogOut } from 'lucide-react'
-import { NavLink, Outlet } from 'react-router'
+import { User } from 'lucide-react'
+import { NavLink, Outlet, useNavigate } from 'react-router'
 import { BottomNav, type NavItem } from '@/components/BottomNav'
 import { Logo } from '@/components/Logo'
 import { NenTrangTri } from '@/components/NenTrangTri'
-import { Button } from '@/components/ui/button'
 import { useAuth } from '@/hooks/useAuth'
 import { cn } from '@/lib/cn'
 import { roleLabel, type Role } from '@/lib/types'
 
-// Nền nhẹ theo vai trò để biết ngay mình đang ở khu vực nào.
 const roleTint: Record<Role, string> = {
   teacher: 'bg-sage',
   student: 'bg-peach',
   parent: 'bg-lavender',
 }
 
-/**
- * Khung ứng dụng theo vai trò: thanh trên (máy tính) + thanh dưới (điện thoại).
- * Nội dung trang hiển thị qua <Outlet />.
- */
+function AvatarButton() {
+  const { profile } = useAuth()
+  const navigate = useNavigate()
+
+  const initials = profile?.full_name
+    .split(' ')
+    .filter(Boolean)
+    .slice(-2)
+    .map((w) => w[0])
+    .join('')
+    .toUpperCase()
+
+  return (
+    <button
+      onClick={() => navigate('/profile')}
+      className="size-10 shrink-0 overflow-hidden rounded-full border-2 border-primary-softer transition-transform hover:scale-105 active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+      aria-label="Trang cá nhân"
+    >
+      {profile?.avatar_url ? (
+        <img
+          src={profile.avatar_url}
+          alt={profile.full_name}
+          className="size-full object-cover"
+        />
+      ) : (
+        <span className="grid size-full place-items-center bg-primary-softer text-sm font-bold text-primary-foreground">
+          {initials || <User className="size-4" strokeWidth={2} />}
+        </span>
+      )}
+    </button>
+  )
+}
+
 export function AppLayout({ role, items }: { role: Role; items: NavItem[] }) {
-  const { profile, signOut } = useAuth()
+  const { profile } = useAuth()
 
   return (
     <div className={cn('relative min-h-dvh', roleTint[role])}>
@@ -57,9 +84,7 @@ export function AppLayout({ role, items }: { role: Role; items: NavItem[] }) {
               <p className="text-sm font-semibold leading-tight">{profile?.full_name}</p>
               <p className="text-xs text-muted-foreground">{roleLabel[role]}</p>
             </div>
-            <Button variant="outline" size="icon" onClick={() => void signOut()} aria-label="Đăng xuất">
-              <LogOut className="size-4" strokeWidth={1.75} aria-hidden="true" />
-            </Button>
+            <AvatarButton />
           </div>
         </div>
       </header>
@@ -67,9 +92,7 @@ export function AppLayout({ role, items }: { role: Role; items: NavItem[] }) {
       {/* Thanh trên gọn — điện thoại */}
       <header className="sticky top-0 z-30 flex items-center justify-between border-b border-border bg-card/70 px-4 py-3 backdrop-blur-xl md:hidden">
         <Logo />
-        <Button variant="ghost" size="icon" onClick={() => void signOut()} aria-label="Đăng xuất">
-          <LogOut className="size-5" strokeWidth={1.75} aria-hidden="true" />
-        </Button>
+        <AvatarButton />
       </header>
 
       {/* Nội dung — chừa chỗ cho bottom nav trên điện thoại */}

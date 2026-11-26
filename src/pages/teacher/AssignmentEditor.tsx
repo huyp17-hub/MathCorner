@@ -78,6 +78,8 @@ function blankQuestion(kind: Exclude<QuestionKind, 'drag_drop'>): EditorQuestion
     choices: [],
     answer_keys: [''],
     explanation: '',
+    section_id: null,
+    group_id: null,
   }
   if (kind === 'multiple_choice' || kind === 'true_false') {
     q.choices = Array.from({ length: 4 }, () => ({ content: '', is_correct: false }))
