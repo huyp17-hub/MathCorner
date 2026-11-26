@@ -27,6 +27,7 @@ import StudentDashboard from '@/pages/student/Dashboard'
 import MyAttendance from '@/pages/student/MyAttendance'
 import MyClasses from '@/pages/student/MyClasses'
 import MyClassDetail from '@/pages/student/MyClassDetail'
+import MyTuition from '@/pages/student/MyTuition'
 import StudentAssignments from '@/pages/student/Assignments'
 import AssignmentRunner from '@/pages/student/AssignmentRunner'
 import UserProfile from '@/pages/UserProfile'
@@ -55,6 +56,7 @@ const studentNav: NavItem[] = [
   { to: '/student/classes', label: 'Lớp học', icon: BookOpen },
   { to: '/student/assignments', label: 'Bài tập', icon: ClipboardList },
   { to: '/student/attendance', label: 'Điểm danh', icon: CalendarCheck },
+  { to: '/student/tuition', label: 'Học phí', icon: Wallet },
 ]
 
 const parentNav: NavItem[] = [
@@ -140,6 +142,7 @@ export default function App() {
         <Route path="/student/assignments" element={<StudentAssignments />} />
         <Route path="/student/assignments/:assignmentId" element={<AssignmentRunner />} />
         <Route path="/student/attendance" element={<MyAttendance />} />
+        <Route path="/student/tuition" element={<MyTuition />} />
         <Route path="/profile" element={<UserProfile />} />
       </Route>
 

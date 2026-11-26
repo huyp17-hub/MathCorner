@@ -14,6 +14,7 @@ export interface NavItem {
  * Nền trắng 72% + backdrop-blur, bo tròn hoàn toàn; mục chọn có nền san hô nhạt.
  */
 export function BottomNav({ items }: { items: NavItem[] }) {
+  const many = items.length > 4
   return (
     <nav
       className="fixed inset-x-4 bottom-4 z-40 mx-auto flex max-w-lg justify-around rounded-full border border-border bg-card/70 p-2 shadow-lift backdrop-blur-xl"
@@ -26,13 +27,14 @@ export function BottomNav({ items }: { items: NavItem[] }) {
           end={end}
           className={({ isActive }) =>
             cn(
-              'flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-full px-1 py-1.5 text-[11px] font-semibold transition-colors',
+              'flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-full py-1.5 font-semibold transition-colors',
+              many ? 'px-0.5 text-[10px]' : 'px-1 text-[11px]',
               isActive ? 'bg-primary-softer text-primary-foreground' : 'text-muted-foreground',
             )
           }
         >
-          <Icon className="size-5" strokeWidth={1.75} aria-hidden="true" />
-          <span className="truncate">{label}</span>
+          <Icon className={cn(many ? 'size-[18px]' : 'size-5')} strokeWidth={1.75} aria-hidden="true" />
+          <span className="max-w-full truncate">{label}</span>
         </NavLink>
       ))}
     </nav>

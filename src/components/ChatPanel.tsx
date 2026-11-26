@@ -278,8 +278,8 @@ export function ChatPanel({ classId, userId, userRole }: ChatPanelProps) {
                         </p>
                       </div>
 
-                      {/* Actions */}
-                      <div className="flex shrink-0 flex-col gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+                      {/* Actions — always visible on mobile, hover on desktop */}
+                      <div className="flex shrink-0 flex-col gap-0.5 transition-opacity md:opacity-0 md:group-hover:opacity-100">
                         <button
                           onClick={() => setReplyTo(msg)}
                           className="rounded-lg p-1 hover:bg-black/[0.06]"

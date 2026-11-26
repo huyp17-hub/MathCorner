@@ -83,6 +83,12 @@
   }
 }
 
+@utility no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+}
+
 /* Hiện dần khi cuộn (trang giới thiệu / trang chủ) */
 @utility reveal-init {
   opacity: 0;
