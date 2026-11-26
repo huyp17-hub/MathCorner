@@ -8,7 +8,7 @@ export interface ClassMessage {
   reply_to: string | null
   pinned: boolean
   created_at: string
-  sender?: { full_name: string; role: string }
+  sender?: { full_name: string; role: string; avatar_url: string | null }
 }
 
 async function enrichWithProfiles(
@@ -18,10 +18,10 @@ async function enrichWithProfiles(
   const ids = [...new Set(rows.map((r) => r.sender_id))]
   const { data: profiles } = await supabase
     .from('profiles')
-    .select('id, full_name, role')
+    .select('id, full_name, role, avatar_url')
     .in('id', ids)
   const profileMap = new Map(
-    (profiles ?? []).map((p) => [p.id, { full_name: p.full_name, role: p.role }]),
+    (profiles ?? []).map((p) => [p.id, { full_name: p.full_name, role: p.role, avatar_url: p.avatar_url ?? null }]),
   )
   return rows.map((r) => ({
     ...r,
@@ -105,7 +105,7 @@ export function subscribeMessages(
         const row = payload.new as Record<string, unknown>
         const { data: profile } = await supabase
           .from('profiles')
-          .select('full_name, role')
+          .select('full_name, role, avatar_url')
           .eq('id', row.sender_id as string)
           .single()
         onInsert({
@@ -116,7 +116,9 @@ export function subscribeMessages(
           reply_to: (row.reply_to as string) ?? null,
           pinned: (row.pinned as boolean) ?? false,
           created_at: row.created_at as string,
-          sender: profile ?? { full_name: 'Ẩn danh', role: 'student' },
+          sender: profile
+            ? { full_name: profile.full_name, role: profile.role, avatar_url: profile.avatar_url ?? null }
+            : { full_name: 'Ẩn danh', role: 'student', avatar_url: null },
         })
       },
     )

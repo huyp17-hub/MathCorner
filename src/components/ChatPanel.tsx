@@ -213,16 +213,24 @@ export function ChatPanel({ classId, userId, userRole }: ChatPanelProps) {
                       )}
                     >
                       {/* Avatar */}
-                      <div
-                        className={cn(
-                          'grid size-8 shrink-0 place-items-center rounded-full text-xs font-bold',
-                          isTeacher
-                            ? 'bg-sage text-foreground'
-                            : 'bg-peach text-foreground',
-                        )}
-                      >
-                        {(msg.sender?.full_name ?? '?')[0].toUpperCase()}
-                      </div>
+                      {msg.sender?.avatar_url ? (
+                        <img
+                          src={msg.sender.avatar_url}
+                          alt={msg.sender.full_name}
+                          className="size-8 shrink-0 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div
+                          className={cn(
+                            'grid size-8 shrink-0 place-items-center rounded-full text-xs font-bold',
+                            isTeacher
+                              ? 'bg-sage text-foreground'
+                              : 'bg-peach text-foreground',
+                          )}
+                        >
+                          {(msg.sender?.full_name ?? '?')[0].toUpperCase()}
+                        </div>
+                      )}
 
                       {/* Bubble */}
                       <div
